@@ -1,0 +1,86 @@
+---
+- name: Create elasticsearch config directory
+  become: true
+  file: path={{ elasticsearch_path }}/config state=directory
+
+- name: Create elasticsearch config/scripts directory
+  become: true
+  file: path={{ elasticsearch_path }}/config/scripts state=directory
+
+- name: Create elasticsearch data directory
+  become: true
+  file: path={{ elasticsearch_path }}/data state=directory
+
+- name: Create elasticsearch logs directory
+  become: true
+  file: path={{ elasticsearch_path }}/logs state=directory
+
+- name: Create elasticsearch config file
+  become: true
+  template:
+    dest: "{{ elasticsearch_path }}/config/elasticsearch.yml"
+    src: "templates/elasticsearch.yml.j2"
+    mode: 0644
+  register: elasticsearch_service_config
+
+- name: Create elasticsearch jvm config file
+  become: true
+  template:
+    dest: "{{ elasticsearch_path }}/config/jvm.options"
+    src: "templates/jvm.options.j2"
+    mode: 0644
+  register: elasticsearch_service_config
+
+- name: Create elasticsearch log4j2 config file
+  become: true
+  template:
+    dest: "{{ elasticsearch_path }}/config/log4j2.properties"
+    src: "templates/log4j2.properties.j2"
+    mode: 0644
+  register: elasticsearch_service_config
+
+- name: Create elasticsearch container
+  become: true
+  docker_container:
+    name: "{{ elasticsearch_service }}"
+    capabilities:
+      - IPC_LOCK
+    command: "{{ elasticsearch_args }}"
+    detach: true
+    image: "{{ elasticsearch_image }}"
+    network_mode: host
+    state: present
+    ulimits:
+      - "memlock:-1:-1"
+    volumes:
+      - "{{ elasticsearch_path }}/config:/usr/share/elasticsearch/config:Z"
+      - "{{ elasticsearch_path }}/data:/usr/share/elasticsearch/data:Z"
+      - "{{ elasticsearch_path }}/logs:/var/logs/elasticsearch:Z"
+  register: elasticsearch_service_config
+
+- name: Create elasticsearch service file
+  become: true
+  template:
+    dest: "/etc/systemd/system/{{ elasticsearch_service }}.service"
+    src: "templates/elasticsearch.service.j2"
+    mode: 0664
+  register: elasticsearch_service_config
+  when: ansible_service_mgr == 'systemd'
+
+- name: Restart elasticsearch service
+  become: true
+  systemd:
+    name: "{{ elasticsearch_service }}.service"
+    daemon_reload: yes
+    state: restarted
+  when:
+    - elasticsearch_service_config.changed
+    - elasticsearch_enabled
+
+- name: Enable elasticsearch service
+  become: true
+  service:
+    name: "{{ elasticsearch_service }}.service"
+    state: started
+    enabled: yes
+  when: elasticsearch_enabled
