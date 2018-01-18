@@ -1,19 +1,39 @@
 ---
 - name: Create elasticsearch config directory
   become: true
-  file: path={{ elasticsearch_path }}/config state=directory
+  file:
+    path: "{{ elasticsearch_path }}/config"
+    state: directory
+    mode: 0775
+    owner: 1000
+    group: 1000
 
 - name: Create elasticsearch config/scripts directory
   become: true
-  file: path={{ elasticsearch_path }}/config/scripts state=directory
+  file:
+    path: "{{ elasticsearch_path }}/scripts"
+    state: directory
+    mode: 0775
+    owner: 1000
+    group: 1000
 
 - name: Create elasticsearch data directory
   become: true
-  file: path={{ elasticsearch_path }}/data state=directory
+  file:
+    path: "{{ elasticsearch_path }}/data"
+    state: directory
+    mode: 0775
+    owner: 1000
+    group: 1000
 
 - name: Create elasticsearch logs directory
   become: true
-  file: path={{ elasticsearch_path }}/logs state=directory
+  file:
+    path: "{{ elasticsearch_path }}/logs"
+    state: directory
+    mode: 0775
+    owner: 1000
+    group: 1000
 
 - name: Create elasticsearch config file
   become: true
@@ -21,6 +41,8 @@
     dest: "{{ elasticsearch_path }}/config/elasticsearch.yml"
     src: "templates/elasticsearch.yml.j2"
     mode: 0644
+    owner: 1000
+    group: 1000
   register: elasticsearch_service_config
 
 - name: Create elasticsearch jvm config file
@@ -29,6 +51,8 @@
     dest: "{{ elasticsearch_path }}/config/jvm.options"
     src: "templates/jvm.options.j2"
     mode: 0644
+    owner: 1000
+    group: 1000
   register: elasticsearch_service_config
 
 - name: Create elasticsearch log4j2 config file
@@ -37,6 +61,8 @@
     dest: "{{ elasticsearch_path }}/config/log4j2.properties"
     src: "templates/log4j2.properties.j2"
     mode: 0644
+    owner: 1000
+    group: 1000
   register: elasticsearch_service_config
 
 - name: Create elasticsearch container
@@ -53,9 +79,11 @@
     ulimits:
       - "memlock:-1:-1"
     volumes:
-      - "{{ elasticsearch_path }}/config:/usr/share/elasticsearch/config:Z"
+      - "{{ elasticsearch_path }}/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:Z"
+      - "{{ elasticsearch_path }}/config/jvm.options:/usr/share/elasticsearch/config/jvm.options:Z"
+      - "{{ elasticsearch_path }}/config/log4j2.properties:/usr/share/elasticsearch/config/log4j2.properties:Z"
       - "{{ elasticsearch_path }}/data:/usr/share/elasticsearch/data:Z"
-      - "{{ elasticsearch_path }}/logs:/var/logs/elasticsearch:Z"
+      - "{{ elasticsearch_path }}/logs:/usr/share/elasticsearch/logs:Z"
   register: elasticsearch_service_config
 
 - name: Create elasticsearch service file

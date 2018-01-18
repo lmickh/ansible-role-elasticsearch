@@ -25,7 +25,7 @@ elasticsearch_config:
   node.data: true
   node.ingest: true
 elasticsearch_enabled: true
-elasticsearch_image: elasticsearch:5.3-alpine
+elasticsearch_image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.1.2
 elasticsearch_jvm_heapsize: "256M"
 elasticsearch_node_name: "{{ inventory_hostname }}"
 elasticsearch_path: "/opt/elasticsearch"
