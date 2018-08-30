@@ -78,6 +78,7 @@
     state: present
     ulimits:
       - "memlock:-1:-1"
+      - "ulimit:65536:65536"
     volumes:
       - "{{ elasticsearch_path }}/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:Z"
       - "{{ elasticsearch_path }}/config/jvm.options:/usr/share/elasticsearch/config/jvm.options:Z"
