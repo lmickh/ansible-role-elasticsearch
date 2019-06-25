@@ -1,5 +1,4 @@
-dependencies:
-  #- lmickh.docker
+dependencies: []
 galaxy_info:
   author: lmickh
   description: Install and run Elasticsearch as Docker container.
