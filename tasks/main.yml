@@ -35,6 +35,17 @@
     owner: 1000
     group: 1000
 
+- name: Create elasticsearch logs symlink
+  become: true
+  file:
+    dest: "/var/log/elasticsearch"
+    src: "{{ elasticsearch_path }}/logs"
+    # mode: 0775
+    # owner: 1000
+    # group: 1000
+    state: link
+  when: elasticsearch_logs_symlink_enabled | bool
+
 - name: Create elasticsearch config file
   become: true
   template:
@@ -43,7 +54,7 @@
     mode: 0644
     owner: 1000
     group: 1000
-  register: elasticsearch_service_config
+  notify: restart elasticsearch
 
 - name: Create elasticsearch jvm config file
   become: true
@@ -53,7 +64,7 @@
     mode: 0644
     owner: 1000
     group: 1000
-  register: elasticsearch_service_config
+  notify: restart elasticsearch
 
 - name: Create elasticsearch log4j2 config file
   become: true
@@ -63,7 +74,7 @@
     mode: 0644
     owner: 1000
     group: 1000
-  register: elasticsearch_service_config
+  notify: restart elasticsearch
 
 - name: Create elasticsearch container
   become: true
@@ -75,6 +86,9 @@
     detach: true
     image: "{{ elasticsearch_image }}"
     network_mode: host
+    ports:
+      - 9200:9200
+      - 9300:9300
     state: present
     ulimits:
       - "memlock:-1:-1"
@@ -85,7 +99,7 @@
       - "{{ elasticsearch_path }}/config/log4j2.properties:/usr/share/elasticsearch/config/log4j2.properties:Z"
       - "{{ elasticsearch_path }}/data:/usr/share/elasticsearch/data:Z"
       - "{{ elasticsearch_path }}/logs:/usr/share/elasticsearch/logs:Z"
-  register: elasticsearch_service_config
+  notify: restart elasticsearch 
 
 - name: Create elasticsearch service file
   become: true
@@ -93,18 +107,8 @@
     dest: "/etc/systemd/system/{{ elasticsearch_service }}.service"
     src: "templates/elasticsearch.service.j2"
     mode: 0664
-  register: elasticsearch_service_config
+  notify: restart elasticsearch 
   when: ansible_service_mgr == 'systemd'
-
-- name: Restart elasticsearch service
-  become: true
-  systemd:
-    name: "{{ elasticsearch_service }}.service"
-    daemon_reload: yes
-    state: restarted
-  when:
-    - elasticsearch_service_config.changed
-    - elasticsearch_enabled
 
 - name: Enable elasticsearch service
   become: true
@@ -112,4 +116,4 @@
     name: "{{ elasticsearch_service }}.service"
     state: started
     enabled: yes
-  when: elasticsearch_enabled
+  when: elasticsearch_enabled | bool

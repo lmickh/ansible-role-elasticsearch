@@ -1,10 +1,10 @@
 dependencies:
-  - lmickh.docker
+  #- lmickh.docker
 galaxy_info:
   author: lmickh
   description: Install and run Elasticsearch as Docker container.
   license: MIT
-  min_ansible_version: 2.2
+  min_ansible_version: 2.7
   platforms:
     - name: EL
       versions:

@@ -1,3 +1,11 @@
+## 1.1.0
+
+* Version bump to ES v6.7.
+* Replaced register with handler for restart.
+* Added better log4j2 defaults and slowlogs.
+* Added optional symlink of logs dir to `/var/log/elasticsearch`.
+* Changed default heap size to be dynamic.
+
 ## 1.0.0
 
 BACKWARDS INCOMPATIBILITIES / NOTES:

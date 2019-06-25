@@ -1,7 +1,7 @@
 # This file is managed by Ansible.  Do NOT edit it manually.
 -Xms{{ elasticsearch_jvm_heapsize }}
 -Xmx{{ elasticsearch_jvm_heapsize }}
--XX:+UseConcMarkSweepGC
+#-XX:+UseConcMarkSweepGC
 -XX:CMSInitiatingOccupancyFraction=75
 -XX:+UseCMSInitiatingOccupancyOnly
 # disable calls to System#gc
