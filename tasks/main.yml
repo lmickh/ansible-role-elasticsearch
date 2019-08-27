@@ -76,6 +76,9 @@
     group: 1000
   notify: restart elasticsearch
 
+- name: Include open distro certs task
+  include: open_distro_certs.yml
+
 - name: Create elasticsearch container
   become: true
   docker_container:
@@ -84,6 +87,8 @@
       - IPC_LOCK
     command: "{{ elasticsearch_args }}"
     detach: true
+    env:
+      ES_JAVA_OPTS: "-Xms{{ elasticsearch_jvm_heapsize }} -Xmx{{ elasticsearch_jvm_heapsize }}"
     image: "{{ elasticsearch_image }}"
     network_mode: host
     ports:
@@ -93,13 +98,8 @@
     ulimits:
       - "memlock:-1:-1"
       - "nofile:65536:65536"
-    volumes:
-      - "{{ elasticsearch_path }}/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:Z"
-      - "{{ elasticsearch_path }}/config/jvm.options:/usr/share/elasticsearch/config/jvm.options:Z"
-      - "{{ elasticsearch_path }}/config/log4j2.properties:/usr/share/elasticsearch/config/log4j2.properties:Z"
-      - "{{ elasticsearch_path }}/data:/usr/share/elasticsearch/data:Z"
-      - "{{ elasticsearch_path }}/logs:/usr/share/elasticsearch/logs:Z"
-  notify: restart elasticsearch 
+    volumes: "{{ elasticsearch_volumes }}"
+  notify: restart elasticsearch
 
 - name: Create elasticsearch service file
   become: true
@@ -107,7 +107,7 @@
     dest: "/etc/systemd/system/{{ elasticsearch_service }}.service"
     src: "templates/elasticsearch.service.j2"
     mode: 0664
-  notify: restart elasticsearch 
+  notify: restart elasticsearch
   when: ansible_service_mgr == 'systemd'
 
 - name: Enable elasticsearch service

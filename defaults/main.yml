@@ -11,18 +11,19 @@ elasticsearch_config:
   node.master: true
   node.data: true
   node.ingest: true
-  xpack.ml.enabled: false
-  xpack.monitoring.enabled: false
-  xpack.monitoring.collection.enabled: false
-  xpack.security.enabled: false
-  xpack.security.audit.enabled: false
-  xpack.watcher.enabled: false
 elasticsearch_enabled: true
 elasticsearch_gid: 1000
-elasticsearch_image: elasticsearch:6.7.2
-elasticsearch_jvm_heapsize: "{{ ansible_memtotal_mb // 2}}M"
+elasticsearch_image: elasticsearch:6.7.2-oss
+elasticsearch_jvm_heapsize: "{{ ansible_memtotal_mb // 2}}m"
 elasticsearch_logs_symlink_enabled: true
 elasticsearch_node_name: "{{ inventory_hostname }}"
 elasticsearch_path: "/opt/elasticsearch"
 elasticsearch_service: "elasticsearch"
 elasticsearch_uid: 1000
+
+elasticsearch_volumes:
+  - "{{ elasticsearch_path }}/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:Z"
+  - "{{ elasticsearch_path }}/config/jvm.options:/usr/share/elasticsearch/config/jvm.options:Z"
+  - "{{ elasticsearch_path }}/config/log4j2.properties:/usr/share/elasticsearch/config/log4j2.properties:Z"
+  - "{{ elasticsearch_path }}/data:/usr/share/elasticsearch/data:Z"
+  - "{{ elasticsearch_path }}/logs:/usr/share/elasticsearch/logs:Z"
