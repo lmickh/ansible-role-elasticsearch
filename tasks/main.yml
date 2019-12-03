@@ -91,9 +91,8 @@
       ES_JAVA_OPTS: "-Xms{{ elasticsearch_jvm_heapsize }} -Xmx{{ elasticsearch_jvm_heapsize }}"
     image: "{{ elasticsearch_image }}"
     network_mode: host
-    ports:
-      - 9200:9200
-      - 9300:9300
+    ports: "{{ elasticsearch_ports }}"
+    shm_size: "{{ elasticsearch_shm_size }}"
     state: present
     ulimits:
       - "memlock:-1:-1"
